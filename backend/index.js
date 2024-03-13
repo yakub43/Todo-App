@@ -1,8 +1,9 @@
 // write basic express boilerplate code
 // with express.json() middleware
 
-const app = require(express);
+const express = require("express")
 const {createTodo, updateTodo} = require("./types")
+app = express();
 
 app.use(express.json());
 
@@ -41,3 +42,4 @@ app.put("/completed", function(req, res){
     return;
 })
 
+app.listen(3000)
