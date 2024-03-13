@@ -2,7 +2,8 @@
 // with express.json() middleware
 
 const express = require("express")
-const {createTodo, updateTodo} = require("./types")
+const {createTodo, updateTodo} = require("./types");
+const { todo } = require("./db");
 app = express();
 
 app.use(express.json());
@@ -14,9 +15,9 @@ app.use(express.json());
 // }
 
 
-app.post("/todo", function(req, res){
+app.post("/todo", async function(req, res){
     const createPayload = req.body;
-    const parsePayload = createPayload.safeParse(createPayload);
+    const parsePayload = createTodo.safeParse(createPayload);
     if (!parsePayload.success){
         res.status(411).json({
             msg:"Wrong Inputs",
@@ -24,14 +25,31 @@ app.post("/todo", function(req, res){
         return;
     }
     // put it into mongodb
+    await todo.create({
+        title: createPayload.title,
+        description: createPayload.description,
+        completed: false
+    })
+
+    res.json({
+        msg: "Todo Created..."
+    })
 
 })
 
-app.get("/todos", function(req, res){
+app.get("/todos", async function(req, res) {
+
+    const todos = await todo.find({});
+
+    console.log(todos)
+
+    res.json({
+        todos
+    })
 
 })
 
-app.put("/completed", function(req, res){
+app.put("/completed", async function(req, res){
     const updatePaload = req.body;
     const parsePayload = updateTodo.safeParse(updatePaload);
     if (!parsePayload.success)(
@@ -39,7 +57,13 @@ app.put("/completed", function(req, res){
             msg:"You sent the wrong inputs",
         })
     )
-    return;
+    await todo.update({
+        _id: req.body.id,
+    },{
+        completed: true,
+    })
+
+    res.json("Todo mark as competed...")
 })
 
 app.listen(3000)
